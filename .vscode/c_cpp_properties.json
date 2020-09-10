@@ -1,0 +1,37 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "Z:/ybh_desktop/jni/**",
+                "Z:/ybh_desktop/jni/app/ybh_setup/**",
+                "Z:/ybh_desktop/jni/app/ybh_records/**",
+                "Z:/ybh_desktop/jni/app/ybh_cameras/**",
+                "Z:/ybh_desktop/jni/app/ybh_keys/**",
+                "Z:/ybh_desktop/jni/app/ybh_intercom/**",
+                "Z:/ybh_desktop/jni/app/ybh_wallpaper/**",
+                "Z:/ybh_desktop/jni/app/ybh_screensave/**",
+                "Z:/ybh_desktop/jni/app/timesetup/**",
+                "Z:/ybh_desktop/jni/include/**",
+                "Z:/ybh_desktop/jni/include/eclipse-paho-mqtt-c-src/**",
+                "Z:/ybh_desktop/jni/include/freetype2/**",
+                "Z:/ybh_desktop/jni/include/ipwatchd/**",
+                "Z:/ybh_desktop/jni/include/jpeg/**",
+                "Z:/ybh_desktop/jni/include/libavcodec/**",
+                "Z:/ybh_desktop/jni/include/libavformat/**",
+                "Z:/ybh_desktop/jni/include/libavutil/**",
+                "Z:/ybh_desktop/jni/include/libswscale/**",
+                "Z:/ybh_desktop/jni/include/png/**",
+                "Z:/ybh_desktop/jni/include/sound/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}
