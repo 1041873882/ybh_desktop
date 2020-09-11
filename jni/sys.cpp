@@ -325,14 +325,14 @@ void __sys::setTZ(void)
 						p+1, h, m, sys.dst.m_start_mon, sys.dst.m_start_week, sys.dst.m_start_date, sys.dst.start_time(), 
 							sys.dst.m_end_mon, sys.dst.m_end_week, sys.dst.m_end_date, sys.dst.end_time());
 		}
-		setenv("TZ", dst, 1);		//orign YBH 2020 8/27
+		setenv("TZ", dst, 1);		
 		printf("sys dst = %s\n",dst);		
 	} else {
 		if (*p == '-')
 			sprintf(tz, "GMT+%s", p+1);
 		else
 			sprintf(tz, "GMT-%s", p+1);	
-		setenv("TZ", tz, 1);		//orign YBH 2020 8/27	
+		setenv("TZ", tz, 1);		
 		printf("sys tz = %s\n",tz);
 	}
 }

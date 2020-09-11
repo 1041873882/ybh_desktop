@@ -62,7 +62,6 @@ void wSetup::select(int menu)
 	m_login_text.hide();
 	m_login.hide();
 
-	/* 使已经 */
 	switch(menu) {
 	case 0:
 		m_room.load(m_style, "room2");

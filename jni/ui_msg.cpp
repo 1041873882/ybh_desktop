@@ -445,9 +445,13 @@ static void ui_web_time_read(const char *body)
 {
 	dxml p;
 
+	// char date[128];
+	// sprintf(date, "%s:%s:%s", sys.settime.time_h(), sys.settime.time_m(), sys.settime.time_s());
+	// p.setText("/params/settime/date", date);
 	p.setInt("/params/ntp/enable", sys.net.ntp_enable());
-	p.setText("/params/settime/hours", sys.settime.time_h());
-
+	p.setText("/params/settime/hour", sys.settime.time_h());
+	p.setText("/params/settime/min", sys.settime.time_m());
+	p.setText("/params/settime/sec", sys.settime.time_s());
 	dmsg_ack(200, p.data());
 }
 
@@ -457,7 +461,9 @@ static void ui_web_time_write(const char *body)
 	dxml p(body);
 
 	sys.net.ntp_enable(p.getInt("/params/ntp/enable", 0));
-	sys.settime.time_h(p.getText("/params/settime/hours"));
+	sys.settime.time_h(p.getText("/params/settime/hour"));
+	sys.settime.time_m(p.getText("/params/settime/min"));
+	sys.settime.time_s(p.getText("/params/settime/sec"));
 	sys.save();
 }
 

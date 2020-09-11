@@ -67,7 +67,7 @@ wTimeSetup::wTimeSetup() : mWindow("ybh_timesetup")
     m_time_m.setMax(2);
     m_time_m.setMode(mEdit::SETTIME);
     m_time_m.setText(s);
-    strcpy(s, "00");
+    sprintf(s, "%02d", tm->tm_sec);  
     m_time_s.setParent(this);
     m_time_s.load(m_style, "time_s");
     m_time_s.setMax(2);
