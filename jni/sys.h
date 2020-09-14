@@ -90,6 +90,7 @@ public:
 		const char *date_m(void) { return m_date_m; };	
 		void date_d(const char *val) { if (val) strcpy(m_date_d, val); };	
 		const char *date_d(void) { return m_date_d; };	
+
 	} settime;
 
 	class __dst { //ybh  2020 8/24

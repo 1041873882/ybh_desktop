@@ -64,6 +64,7 @@ void __sys::load(void)
 	settime.date_m(p.getText("/sys/settime/date_m", "01"));
 	settime.date_d(p.getText("/sys/settime/date_d", "01"));
 
+
 	dst.enable(p.getInt("/sys/dst/enable", 0));
 	dst.start_mon(p.getInt("/sys/dst/start_mon", 1));	
 	dst.start_week(p.getInt("/sys/dst/start_week", 1));	
@@ -157,6 +158,7 @@ void __sys::save(void)
 	p.setText("/sys/settime/date_y", settime.date_y());
 	p.setText("/sys/settime/date_m", settime.date_m());
 	p.setText("/sys/settime/date_d", settime.date_d());
+
 
 	p.setInt("/sys/dst/enable", dst.enable());
 	p.setInt("/sys/dst/start_mon", dst.start_mon());

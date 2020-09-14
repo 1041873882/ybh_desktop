@@ -444,14 +444,19 @@ static void ui_web_advanced_write(const char *body)
 static void ui_web_time_read(const char *body)
 {
 	dxml p;
+	char time[128];
+	char date[128];
 
-	// char date[128];
-	// sprintf(date, "%s:%s:%s", sys.settime.time_h(), sys.settime.time_m(), sys.settime.time_s());
-	// p.setText("/params/settime/date", date);
 	p.setInt("/params/ntp/enable", sys.net.ntp_enable());
+	p.setText("/params/settime/tz", sys.user.tz());
 	p.setText("/params/settime/hour", sys.settime.time_h());
 	p.setText("/params/settime/min", sys.settime.time_m());
 	p.setText("/params/settime/sec", sys.settime.time_s());
+		
+	sprintf(time, "%s:%s:%s", sys.settime.time_h(), sys.settime.time_m(), sys.settime.time_s());
+	sprintf(date, "%s-%s-%s", sys.settime.date_y(), sys.settime.date_m(), sys.settime.date_d());
+	p.setText("/params/settime/time", time);
+	p.setText("/params/settime/date", date);
 	dmsg_ack(200, p.data());
 }
 
@@ -461,9 +466,15 @@ static void ui_web_time_write(const char *body)
 	dxml p(body);
 
 	sys.net.ntp_enable(p.getInt("/params/ntp/enable", 0));
-	sys.settime.time_h(p.getText("/params/settime/hour"));
-	sys.settime.time_m(p.getText("/params/settime/min"));
-	sys.settime.time_s(p.getText("/params/settime/sec"));
+	sys.user.tz(p.getText("/params/settime/tz", "+00:00"));
+	sys.settime.time_h(p.getText("/params/settime/hour","00"));
+	printf("sys/hour = %s\n",sys.settime.time_h());
+	sys.settime.time_m(p.getText("/params/settime/min","00"));
+	sys.settime.time_s(p.getText("/params/settime/sec","00"));
+	
+	sys.settime.date_y(p.getText("/params/settime/year", "1970"));
+	sys.settime.date_m(p.getText("/params/settime/mon", "1"));
+	sys.settime.date_d(p.getText("/params/settime/day", "1"));
 	sys.save();
 }
 
