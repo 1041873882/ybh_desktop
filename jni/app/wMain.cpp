@@ -41,14 +41,18 @@ void sys_ipwd_result(int result, const char *ip, const char *mac)
 
 wMain::wMain() : mWindow("ybh_main")
 {
-	ybh_wWallPaper wall;
-	//SysMain = this;
-	char s[128];
+	int x;
+	x = sys.user.bkg();
 
-	fprintf(stderr, "sss%d\n", wall.y_b);
+	const char *y_main_wall[] = {"bkg0", "bkg1", "bkg2", "bkg3"};
 
 	m_bkg.setParent(this);
-	m_bkg.load(m_style, y_main_wall[wall.y_b]);
+	if ( y_main_wall[x] != NULL) 
+		m_bkg.load(m_style, y_main_wall[x]);
+	else
+		m_bkg.load(m_style, y_main_wall[0]);
+		
+	m_bkg.load(m_style, y_main_wall[x]);
 	m_logo.setParent(this);
 	m_logo.load(m_style, "logo");
 	m_bkg_time.setParent(this);

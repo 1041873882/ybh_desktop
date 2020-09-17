@@ -52,6 +52,7 @@ public:
 		int m_language;
 		int m_ring;
 		int m_ban; //禁止被分机呼叫
+		int m_bkg;
 		std::string m_tz; //时区
 
 		void passwd(const char *val) { if (val) strcpy(m_passwd, val); };
@@ -64,11 +65,14 @@ public:
 		int ring(void) { return m_ring; };
 		void ban(int val) { m_ban = val; };
 		int ban(void) { return m_ban; };
+		void bkg(int val) { m_bkg = val; };
+		int bkg(void) { return m_bkg; };
 	} user;
 
 	class __settime { //ybh  2020 8/24
 	public:
 		int m_date;	//日期显示格式
+		char m_web_time[128];
 		char m_time_h[16];	
 		char m_time_m[16];	
 		char m_time_s[16];	
@@ -78,6 +82,8 @@ public:
 
 		void date(int val) { m_date = val; };
 		int date(void) { return m_date; };
+		void web_time(const char *val) { if (val) strcpy(m_web_time, val); };	
+		const char *web_time(void) { return m_web_time; };	
 		void time_h(const char *val) { if (val) strcpy(m_time_h, val); };	
 		const char *time_h(void) { return m_time_h; };	
 		void time_m(const char *val) { if (val) strcpy(m_time_m, val); };	
@@ -96,33 +102,36 @@ public:
 	class __dst { //ybh  2020 8/24
 	public:
 		int m_enable;
+		int m_bias;
 		int m_start_mon;	
 		int m_start_week;	
 		int m_start_date;
-		char m_start_time[16];	
+		int m_start_time;	
 		int m_end_mon;	
 		int m_end_week;	
 		int m_end_date;
-		char m_end_time[16];	
+		int m_end_time;	
 
 		void enable(int val) { m_enable = val; };
 		int enable(void) { return m_enable; };
+		void bias(int val) { m_bias = val; };
+		int bias(void) { return m_bias; };
 		void start_mon(int val) { m_start_mon = val; };	
 		int start_mon(void) { return m_start_mon; };	
 		void start_week(int val) { m_start_week = val; };	
 		int start_week(void) { return m_start_week; };		
 		void start_date(int val) { m_start_date = val; };	
 		int start_date(void) { return m_start_date; };		
-		void start_time(const char *val) { if (val) strcpy(m_start_time, val); };	
-		const char *start_time(void) { return m_start_time; };	
+		void start_time(int val) {  m_start_time = val; };	
+		int start_time(void) { return m_start_time; };	
 		void end_mon(int val) { m_end_mon = val; };	
 		int end_mon(void) { return m_end_mon; };	
 		void end_week(int val) { m_end_week = val; };	
 		int end_week(void) { return m_end_week; };	
 		void end_date(int val) { m_end_date = val; };	
 		int end_date(void) { return m_end_date; };
-		void end_time(const char *val) { if (val) strcpy(m_end_time, val); };	
-		const char *end_time(void) { return m_end_time; };		
+		void end_time(int val) {  m_end_time = val; };	
+		int end_time(void) { return m_end_time; };
 	} dst;
 
 	class __admin {

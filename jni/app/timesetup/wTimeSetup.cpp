@@ -13,6 +13,7 @@ int wTimeSetup::m_setdst = 0;
 wTimeSetup::wTimeSetup() : mWindow("ybh_timesetup")
 {
     m_setntp = sys.net.m_ntp_enable;
+    m_setdst = sys.dst.m_enable;
     time_t now = time(NULL);
 	struct tm *tm = localtime(&now);
     char s[128];
@@ -163,15 +164,15 @@ wTimeSetup::wTimeSetup() : mWindow("ybh_timesetup")
 
     m_start_time.setParent(this);
     m_start_time.load(m_style, "start_time");
-    m_start_time.setMax(5);
+    m_start_time.setMax(2);
     m_start_time.setMode(mEdit::DSTTIME);
-    m_start_time.setText(sys.dst.start_time());
+    m_start_time.setInt(sys.dst.m_start_time);
 
     m_end_time.setParent(this);
     m_end_time.load(m_style, "end_time");
-    m_end_time.setMax(5);
+    m_end_time.setMax(2);
     m_end_time.setMode(mEdit::DSTTIME);
-    m_end_time.setText(sys.dst.end_time());
+    m_end_time.setInt(sys.dst.m_end_time);
 
     m_ok.setParent(this);
     m_ok.load(m_style, "ok");
@@ -270,10 +271,12 @@ void wTimeSetup::save(void)
     int y = atoi(old_date_y);
     int m = atoi(old_date_m);
     int d = atoi(old_date_d);
+    int iDstStartTime = atoi(dst_start_time);
+    int iDstEndtTime = atoi(dst_end_time);
 
     /* 年份最大只能设置到2037年 */
     if (atoi(old_time_h) > 23 || atoi(old_time_m) > 59 || atoi(old_time_s) > 59 ||
-            y > 2037 || y ==0  || m > 12 || m == 0 || d == 0) {
+            y > 2037 || y ==0  || m > 12 || m == 0 || d == 0 || iDstStartTime > 23 || iDstEndtTime > 23) {
         err = 1;
     }
 
@@ -310,8 +313,8 @@ void wTimeSetup::save(void)
         sys.settime.date_y(old_date_y);
         sys.settime.date_m(old_date_m);
         sys.settime.date_d(old_date_d);
-        sys.dst.start_time(dst_start_time);
-        sys.dst.end_time(dst_end_time);
+        sys.dst.start_time(iDstStartTime);
+        sys.dst.end_time(iDstEndtTime);
         sys.settime.date(m_dateformat.select());
         sys.dst.start_mon(m_start_mon.select()+1);
         sys.dst.start_week(m_start_week.select()+1);

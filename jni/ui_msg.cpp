@@ -444,19 +444,22 @@ static void ui_web_advanced_write(const char *body)
 static void ui_web_time_read(const char *body)
 {
 	dxml p;
-	char time[128];
-	char date[128];
+	char t[128];
+	// struct tm time_tm;
 
 	p.setInt("/params/ntp/enable", sys.net.ntp_enable());
 	p.setText("/params/settime/tz", sys.user.tz());
 	p.setText("/params/settime/hour", sys.settime.time_h());
 	p.setText("/params/settime/min", sys.settime.time_m());
 	p.setText("/params/settime/sec", sys.settime.time_s());
-		
-	sprintf(time, "%s:%s:%s", sys.settime.time_h(), sys.settime.time_m(), sys.settime.time_s());
-	sprintf(date, "%s-%s-%s", sys.settime.date_y(), sys.settime.date_m(), sys.settime.date_d());
-	p.setText("/params/settime/time", time);
-	p.setText("/params/settime/date", date);
+	p.setText("/params/settime/year", sys.settime.date_y());
+	p.setText("/params/settime/mon", sys.settime.date_m());
+	p.setText("/params/settime/day", sys.settime.date_d());
+
+	// sprintf(t, "%s-%s-%s %s:%s:%s", sys.settime.date_y(), sys.settime.date_m(), sys.settime.date_d(), 
+	//  			sys.settime.time_h(), sys.settime.time_m(), sys.settime.time_s());
+	p.setText("/params/settime/time", sys.settime.web_time());
+	printf("params/settime = %s\n", sys.settime.web_time());
 	dmsg_ack(200, p.data());
 }
 
@@ -464,17 +467,61 @@ static void ui_web_time_write(const char *body)
 {
 	dmsg_ack(200, NULL);
 	dxml p(body);
-
+	char t[128];
+	
 	sys.net.ntp_enable(p.getInt("/params/ntp/enable", 0));
 	sys.user.tz(p.getText("/params/settime/tz", "+00:00"));
-	sys.settime.time_h(p.getText("/params/settime/hour","00"));
-	printf("sys/hour = %s\n",sys.settime.time_h());
-	sys.settime.time_m(p.getText("/params/settime/min","00"));
-	sys.settime.time_s(p.getText("/params/settime/sec","00"));
-	
-	sys.settime.date_y(p.getText("/params/settime/year", "1970"));
+
+	//sys.settime.web_time(p.getText("/params/settime/time"));
+	sys.settime.time_h(p.getText("/params/settime/hour", "00"));
+	sys.settime.time_m(p.getText("/params/settime/min", "00"));
+	sys.settime.time_s(p.getText("/params/settime/sec", "00"));
+	sys.settime.date_y(p.getText("/params/settime/year", "1998"));
 	sys.settime.date_m(p.getText("/params/settime/mon", "1"));
-	sys.settime.date_d(p.getText("/params/settime/day", "1"));
+	sys.settime.date_d(p.getText("/params/settime/date", "2"));
+
+	sprintf(t, "%s-%s-%s %s:%s:%s", sys.settime.date_y(), sys.settime.date_m(), sys.settime.date_d(), 
+				sys.settime.time_h(), sys.settime.time_m(), sys.settime.time_s());
+	sys.settime.web_time(t);
+
+	sys.save();
+}
+
+static void ui_web_dst_read(const char *body)
+{
+	dxml p;
+
+	p.setInt("/params/dst/enable", sys.dst.enable());
+	p.setInt("/params/dst/bias", sys.dst.bias());
+	p.setInt("/params/dst/start_m", sys.dst.start_mon());
+	p.setInt("/params/dst/start_w", sys.dst.start_week());
+	p.setInt("/params/dst/start_d", sys.dst.start_date());
+	p.setInt("/params/dst/start_t", sys.dst.start_time());
+
+	p.setInt("/params/dst/end_m", sys.dst.end_mon());
+	p.setInt("/params/dst/end_w", sys.dst.end_week());
+	p.setInt("/params/dst/end_d", sys.dst.end_date());
+	p.setInt("/params/dst/end_t", sys.dst.end_time());
+
+	dmsg_ack(200, p.data());
+}
+
+static void ui_web_dst_write(const char *body)
+{
+	dmsg_ack(200, NULL);
+	dxml p(body);
+
+	sys.dst.enable(p.getInt("/params/dst/enable", 1));
+	sys.dst.bias(p.getInt("/params/dst/bias", 60));
+	sys.dst.start_mon(p.getInt("/params/dst/start_m", 1));
+	sys.dst.start_week(p.getInt("/params/dst/start_w", 1));
+	sys.dst.start_date(p.getInt("/params/dst/start_d", 1));
+	sys.dst.start_time(p.getInt("/params/dst/start_t", 2));
+
+	sys.dst.end_mon(p.getInt("/params/dst/end_m", 1));
+	sys.dst.end_week(p.getInt("/params/dst/end_w", 1));
+	sys.dst.end_date(p.getInt("/params/dst/end_d", 1));
+	sys.dst.end_time(p.getInt("/params/dst/end_t", 2));
 	sys.save();
 }
 
@@ -541,6 +588,8 @@ int ui_msg_init(void)
 	dmsg_setup("/ui/web/advanced/write", ui_web_advanced_write);
 	dmsg_setup("/ui/web/time/read", ui_web_time_read);	//YBH SETTIME 9/9
 	dmsg_setup("/ui/web/time/write", ui_web_time_write);	
+	dmsg_setup("/ui/web/dst/read", ui_web_dst_read);	//YBH SETTIME 9/9
+	dmsg_setup("/ui/web/dst/write", ui_web_dst_write);	
 
 	dmsg_setup("/ui/mqtt/publish", ui_mqtt_publish);
 

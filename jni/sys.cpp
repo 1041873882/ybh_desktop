@@ -55,8 +55,10 @@ void __sys::load(void)
 	user.language(p.getInt("/sys/user/language", 0));
 	user.ring(p.getInt("/sys/user/ring", 0));
 	user.ban(p.getInt("/sys/user/ban", 0));
+	user.bkg(p.getInt("/sys/bkg", 0));
 
 	settime.date(p.getInt("/sys/settime/date", 0));
+	settime.web_time(p.getText("/sys/settime/web_time", "1970-1-1 00:00:00"));	
 	settime.time_h(p.getText("/sys/settime/time_h", "00"));	
 	settime.time_m(p.getText("/sys/settime/time_m", "00"));	
 	settime.time_s(p.getText("/sys/settime/time_s", "00"));	
@@ -66,14 +68,15 @@ void __sys::load(void)
 
 
 	dst.enable(p.getInt("/sys/dst/enable", 0));
+	dst.bias(p.getInt("/sys/dst/bias", 60));
 	dst.start_mon(p.getInt("/sys/dst/start_mon", 1));	
 	dst.start_week(p.getInt("/sys/dst/start_week", 1));	
 	dst.start_date(p.getInt("/sys/dst/start_date", 0));	//从星期天开始算，星期天表示0.星期一表示1
-	dst.start_time(p.getText("/sys/dst/start_time", "00:00"));
+	dst.start_time(p.getInt("/sys/dst/start_time", 2));
 	dst.end_mon(p.getInt("/sys/dst/end_mon", 1));	
 	dst.end_week(p.getInt("/sys/dst/end_week", 1));	
 	dst.end_date(p.getInt("/sys/dst/end_date", 0));	
-	dst.end_time(p.getText("/sys/dst/end_time", "01:01"));
+	dst.end_time(p.getInt("/sys/dst/end_time", 2));
 
 
 	admin.passwd(p.getText("/sys/admin/passwd", "123456"));
@@ -150,8 +153,10 @@ void __sys::save(void)
 	p.setInt("/sys/user/language", user.language());
 	p.setInt("/sys/user/ring", user.ring());
 	p.setInt("/sys/user/ban", user.ban());
+	p.setInt("/sys/bkg", user.bkg());
 
 	p.setInt("/sys/settime/date", settime.date());
+	p.setText("/sys/settime/web_time", settime.web_time());
 	p.setText("/sys/settime/time_h", settime.time_h());	//YBH 2020 8/24
 	p.setText("/sys/settime/time_m", settime.time_m());	//YBH 2020 8/24
 	p.setText("/sys/settime/time_s", settime.time_s());	//YBH 2020 8/24
@@ -161,14 +166,15 @@ void __sys::save(void)
 
 
 	p.setInt("/sys/dst/enable", dst.enable());
+	p.setInt("/sys/dst/bias", dst.bias());
 	p.setInt("/sys/dst/start_mon", dst.start_mon());
 	p.setInt("/sys/dst/start_week", dst.start_week());
 	p.setInt("/sys/dst/start_date", dst.start_date());
-	p.setText("/sys/dst/start_time", dst.start_time());
+	p.setInt("/sys/dst/start_time", dst.start_time());
 	p.setInt("/sys/dst/end_mon", dst.end_mon());
 	p.setInt("/sys/dst/end_week", dst.end_week());
 	p.setInt("/sys/dst/end_date", dst.end_date());
-	p.setText("/sys/dst/end_time", dst.end_time());
+	p.setInt("/sys/dst/end_time", dst.end_time());
 
 	p.setText("/sys/admin/passwd", admin.passwd());
 
@@ -309,22 +315,32 @@ void __sys::setTZ(void)
 	char s2[3];
 	int h;
 	int m;
+	int hh;
+	int mm;
 	const char *p = user.tz();
 	memcpy(s1, p+1, 2); s1[2] = 0;
 	memcpy(s2, p+4, 2); s2[2] = 0;
 	h = atoi(s1);
 	m = atoi(s2);
+
+	mm = sys.dst.bias();
+	printf("dst/bias=%d\n",sys.dst.bias());
+	
+	hh = mm/60;
+	if (mm >= 60) {
+		mm -= hh*60;
+	} 
 	
 	if (sys.dst.m_enable) {
 		if (*p == '-') {
-			h -= 1;
-			sprintf(dst, "GMT+%s:00NZDT+%02d:%02d:00,M%d.%d.%d/%s:00,M%d.%d.%d/%s:00", 
-						p+1, h, m, sys.dst.m_start_mon, sys.dst.m_start_week, sys.dst.m_start_date, sys.dst.start_time(), 
+			h -= hh;	//夏令时提前小时数
+			sprintf(dst, "GMT+%s:00DST+%02d:%02d:00,M%d.%d.%d/%02d:00,M%d.%d.%d/%02d:00", 
+						p+1, h, mm, sys.dst.m_start_mon, sys.dst.m_start_week, sys.dst.m_start_date, sys.dst.start_time(), 
 							sys.dst.m_end_mon, sys.dst.m_end_week, sys.dst.m_end_date, sys.dst.end_time());
 		} else {
-			h += 1;
-			sprintf(dst, "GMT-%s:00DST-%02d:%02d:00,M%d.%d.%d/%s:00,M%d.%d.%d/%s:00", 
-						p+1, h, m, sys.dst.m_start_mon, sys.dst.m_start_week, sys.dst.m_start_date, sys.dst.start_time(), 
+			h += hh;
+			sprintf(dst, "GMT-%s:00DST-%02d:%02d:00,M%d.%d.%d/%02d:00,M%d.%d.%d/%02d:00", 
+						p+1, h, mm, sys.dst.m_start_mon, sys.dst.m_start_week, sys.dst.m_start_date, sys.dst.start_time(), 
 							sys.dst.m_end_mon, sys.dst.m_end_week, sys.dst.m_end_date, sys.dst.end_time());
 		}
 		setenv("TZ", dst, 1);		
