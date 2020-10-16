@@ -45,7 +45,7 @@ void TalkLogger::save(void)
 	for(int i=0; i<m_sz; i++) {
 		sprintf(s, "/logger/d%d/id", i);
 		p.setText(s, data[i].id.c_str());
-		sprintf(s, "/logger/d%d/type", i);
+		sprintf(s, "/logger/d%d/sip_url", i);
 		p.setInt(s, data[i].type);
 		sprintf(s, "/logger/d%d/done", i);
 		p.setInt(s, data[i].done);

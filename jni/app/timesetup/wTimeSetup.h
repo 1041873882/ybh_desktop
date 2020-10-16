@@ -81,7 +81,6 @@ private:
     int m_ntp_st;
     int m_time_set;
     int m_dst_set;
-
 };
 
 

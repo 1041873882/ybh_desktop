@@ -51,8 +51,6 @@ private:
 	mButton m_bar_mute;
 	mPixmap m_bar_eth;
 
-	wTimeSetup settime;
-
 	uint32_t m_ts_st;
 	uint32_t m_ts_st_h;
 	int m_eth_st;

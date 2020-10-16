@@ -215,22 +215,25 @@ void wMain::loadToolbar(void)
 		strftime(s, sizeof(s), "%P", tm);
 		m_time_hour.setText(s);		
 		
-		if (settime.m_settime) {
-			strftime(s, sizeof(s), "%H : %M", tm);
-			m_time.setText(s);
-		} else {
-			strftime(s, sizeof(s), "%I : %M", tm);
-			m_time.setText(s);
-		} 
+		sys.settime.hour() ? strftime(s, sizeof(s), "%H : %M", tm) : strftime(s, sizeof(s), "%I : %M", tm);
+		m_time.setText(s);
 
-		if (sys.settime.date() == 0) {
+		switch (sys.settime.date())
+		{
+		case 0:
 			strftime(s, sizeof(s), "%d %b %Y", tm);
-			m_date.setText(s);
-		} else if ( sys.settime.date() == 1 ) {
+			break;
+		case 1:
 			strftime(s, sizeof(s), "%b %d %Y", tm);
-			m_date.setText(s);
+			break;
+		case 2:
+			strftime(s, sizeof(s), "%Y %b %d", tm);
+			break;
+		default:
+			break;
 		}
-
+		m_date.setText(s);
+		
 		m_ts_st = tm->tm_min;
 		m_ts_st_h = tm->tm_hour;	
 	}

@@ -1,6 +1,7 @@
 #include "sys.h"
 #include "wMain.h"
 #include "ybh_wKeys.h"
+#include <net/if.h>
 
 ybh_wKeys::ybh_wKeys() : mWindow("ybh_keys")
 {
@@ -12,6 +13,8 @@ ybh_wKeys::ybh_wKeys() : mWindow("ybh_keys")
 
     m_title.setParent(this);
     m_title.load(m_style, "title");
+    
+
 }
 
 ybh_wKeys::~ybh_wKeys()

@@ -56,7 +56,6 @@ void mComboxPopup::doTouch(int x, int y, int m)
 		if (x >= m_x && y >= m_y && x <= (m_x+m_width) && y <= (m_y+m_height)) {
 
 			n = (y-m_y)/m_pixel;
-			printf("n0 = %d\n",n);
 			mEvent e(mEvent::ComboxEnd); 
 			e.wParam = (uint32_t)m_combox;
 			e.lParam = n;
@@ -70,7 +69,6 @@ void mComboxPopup::doTouch(int x, int y, int m)
 	} else { /* 判断上拉框的选项 */
 		if (x >= m_x && y <= m_combox->m_y && x <= (m_x+m_width) && y >= m_y1-m_combox->m_sz*m_pixel) {
 			n = (m_combox->m_y-y)/m_pixel;
-			printf("n1 = %d\n",n);
 			mEvent e(mEvent::ComboxEnd); 
 			e.wParam = (uint32_t)m_combox;
 			e.lParam = n;
@@ -211,7 +209,7 @@ void mCombox::setFocus(int val)
 		this->paint();
 	}
 	pix.setFocus(val);
-	
+
 }
 
 void mCombox::doTouch(int x, int y, int m)

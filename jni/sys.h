@@ -71,68 +71,48 @@ public:
 
 	class __settime { //ybh  2020 8/24
 	public:
+		int m_hour;	//24小时制
 		int m_date;	//日期显示格式
-		char m_web_time[128];
-		char m_time_h[16];	
-		char m_time_m[16];	
-		char m_time_s[16];	
-		char m_date_y[16];
-		char m_date_m[16];
-		char m_date_d[16];
+		char m_settime[128];	
 
+		void hour(int val) { m_hour = val; };
+		int hour(void) { return m_hour; };
 		void date(int val) { m_date = val; };
 		int date(void) { return m_date; };
-		void web_time(const char *val) { if (val) strcpy(m_web_time, val); };	
-		const char *web_time(void) { return m_web_time; };	
-		void time_h(const char *val) { if (val) strcpy(m_time_h, val); };	
-		const char *time_h(void) { return m_time_h; };	
-		void time_m(const char *val) { if (val) strcpy(m_time_m, val); };	
-		const char *time_m(void) { return m_time_m; };		
-		void time_s(const char *val) { if (val) strcpy(m_time_s, val); };	
-		const char *time_s(void) { return m_time_s; };		
-		void date_y(const char *val) { if (val) strcpy(m_date_y, val); };	
-		const char *date_y(void) { return m_date_y; };	
-		void date_m(const char *val) { if (val) strcpy(m_date_m, val); };	
-		const char *date_m(void) { return m_date_m; };	
-		void date_d(const char *val) { if (val) strcpy(m_date_d, val); };	
-		const char *date_d(void) { return m_date_d; };	
-
+		void set_time(const char *val) { if (val) strcpy(m_settime, val); };
+		const char *set_time(void) { return m_settime; };	
 	} settime;
 
 	class __dst { //ybh  2020 8/24
 	public:
 		int m_enable;
 		int m_bias;
-		int m_start_mon;	
-		int m_start_week;	
-		int m_start_date;
-		int m_start_time;	
-		int m_end_mon;	
-		int m_end_week;	
-		int m_end_date;
-		int m_end_time;	
+
+		char m_start_dst[34];
+		char m_end_dst[34];
+
 
 		void enable(int val) { m_enable = val; };
 		int enable(void) { return m_enable; };
 		void bias(int val) { m_bias = val; };
 		int bias(void) { return m_bias; };
-		void start_mon(int val) { m_start_mon = val; };	
-		int start_mon(void) { return m_start_mon; };	
-		void start_week(int val) { m_start_week = val; };	
-		int start_week(void) { return m_start_week; };		
-		void start_date(int val) { m_start_date = val; };	
-		int start_date(void) { return m_start_date; };		
-		void start_time(int val) {  m_start_time = val; };	
-		int start_time(void) { return m_start_time; };	
-		void end_mon(int val) { m_end_mon = val; };	
-		int end_mon(void) { return m_end_mon; };	
-		void end_week(int val) { m_end_week = val; };	
-		int end_week(void) { return m_end_week; };	
-		void end_date(int val) { m_end_date = val; };	
-		int end_date(void) { return m_end_date; };
-		void end_time(int val) {  m_end_time = val; };	
-		int end_time(void) { return m_end_time; };
+
+		void start_dst(const char *val) { if (val) strcpy(m_start_dst, val); };
+		const char *start_dst(void) { return m_start_dst; };	
+		void end_dst(const char *val) { if (val) strcpy(m_end_dst, val); };
+		const char *end_dst(void) { return m_end_dst; };
 	} dst;
+
+	class __tcpdump {	//web抓包
+	public:
+		int m_enable;
+		int m_port;
+
+		void enable(int val) { m_enable = val; }
+		int enable(void) { return m_enable; }
+		void port(int val) { m_port = val; }
+		int port(void) { return m_port; }
+	} tcpdump;
 
 	class __admin {
 
@@ -152,7 +132,7 @@ public:
 		char m_mask[20];
 		char m_gateway[20];
 		char m_dns[20];
-		int m_ntp_enable;	//YBH 2020 8/24
+		int m_ntp_enable;	
 		char m_ntp[64];
 
 		void mac(const char *val) { if (val) strcpy(m_mac, val); };
@@ -167,8 +147,8 @@ public:
 		const char *gateway(void) { return m_gateway; };
 		void dns(const char *val) { if (val) strcpy(m_dns, val); };
 		const char *dns(void) { return m_dns; };
-		void ntp_enable(int val) { m_ntp_enable = val; };		//YBH 2020 8/24
-		int ntp_enable(void) { return m_ntp_enable; };			//YBH 2020 8/24
+		void ntp_enable(int val) { m_ntp_enable = val; };		
+		int ntp_enable(void) { return m_ntp_enable; };			
 		void ntp(const char *val) { if (val) strcpy(m_ntp, val); };
 		const char *ntp(void) { return m_ntp; };
 	} net;
@@ -323,6 +303,7 @@ public:
 	void setHttpUser(void);
 	void setTZ(void);
 	void setTime(void);
+	//void setTcpdump(void);
 	void resetMac(void);
 
 	void version(char *s);

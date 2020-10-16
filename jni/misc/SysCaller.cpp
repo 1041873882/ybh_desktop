@@ -62,6 +62,7 @@ void SysCaller::start(const char *url)
 	dmsg req;
 	dxml p;
 	p.setText("/params/url", url);
+	printf("sip_url = %s\n", url);
 	req.request("/talk/sip/call", p.data());
 }
 
@@ -75,6 +76,7 @@ void SysCaller::calling(const char *id)
 	}
 	if (id) {
 		strcpy(m_id, id);
+		printf("sip_id = %s\n", id);
 		m_h2id_mark = 1;
 	}
 	m_window = 1;
@@ -259,7 +261,7 @@ void SysCaller::logger(int mode)
 	p.setText("/params/event_url", "/msg/talk/logger");
 	p.setText("/params/to", m_id);
 	p.setInt("/params/mode", mode);
-	req.request("/talk/center/to", p.data()); //700协议呼叫日志
+	req.request("/talk/center/to", p.data()); //700锟斤拷????????
 }
 
 #include "SysSecurity.h"
@@ -280,7 +282,7 @@ void SysCaller::slaves(dxml &p)
 	}
 }
 
-//此函数在mEvent主线程调用，不允许处理长时间挂起相关操作
+//???????mEvent?????????????????????????????????
 void SysCaller::ui_process(void)
 {
 	AutoMutex mutex(&m_mutex);

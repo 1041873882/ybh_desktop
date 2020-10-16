@@ -198,7 +198,10 @@ obj/local/armeabi-v7a/objs/ybh_desktop/app/ybh_keys/ybh_wKeys.o: \
  jni/ui/mButton.h jni/ui/mPixmap.h jni/ui/mText.h \
  jni/app/timesetup/wTimeSetup.h jni/ui/mCombox.h jni/ui/mSeekBar.h \
  jni/ui/mEdit.h jni/ui/mButton.h jni/ui/ybh_mKeyboard.h jni/ui/mWindow.h \
- jni/app/ybh_keys/ybh_wKeys.h jni/ui/mText.h
+ jni/app/ybh_keys/ybh_wKeys.h jni/ui/mText.h \
+ /opt/tools/android-ndk-r10e/platforms/android-14/arch-arm/usr/include/net/if.h \
+ /opt/tools/android-ndk-r10e/platforms/android-14/arch-arm/usr/include/linux/if.h \
+ /opt/tools/android-ndk-r10e/platforms/android-14/arch-arm/usr/include/linux/hdlc/ioctl.h
 
 jni/./sys.h:
 
@@ -631,3 +634,9 @@ jni/ui/mWindow.h:
 jni/app/ybh_keys/ybh_wKeys.h:
 
 jni/ui/mText.h:
+
+/opt/tools/android-ndk-r10e/platforms/android-14/arch-arm/usr/include/net/if.h:
+
+/opt/tools/android-ndk-r10e/platforms/android-14/arch-arm/usr/include/linux/if.h:
+
+/opt/tools/android-ndk-r10e/platforms/android-14/arch-arm/usr/include/linux/hdlc/ioctl.h:

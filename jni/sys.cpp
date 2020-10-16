@@ -57,27 +57,17 @@ void __sys::load(void)
 	user.ban(p.getInt("/sys/user/ban", 0));
 	user.bkg(p.getInt("/sys/bkg", 0));
 
-	settime.date(p.getInt("/sys/settime/date", 0));
-	settime.web_time(p.getText("/sys/settime/web_time", "1970-1-1 00:00:00"));	
-	settime.time_h(p.getText("/sys/settime/time_h", "00"));	
-	settime.time_m(p.getText("/sys/settime/time_m", "00"));	
-	settime.time_s(p.getText("/sys/settime/time_s", "00"));	
-	settime.date_y(p.getText("/sys/settime/date_y", "2020"));
-	settime.date_m(p.getText("/sys/settime/date_m", "01"));
-	settime.date_d(p.getText("/sys/settime/date_d", "01"));
-
+	settime.hour(p.getInt("/sys/settime/hour", 0));
+	settime.date(p.getInt("/sys/settime/date", 0));	
+	settime.set_time(p.getText("/sys/settime/settime", "1970-01-01 00:00:00"));
 
 	dst.enable(p.getInt("/sys/dst/enable", 0));
 	dst.bias(p.getInt("/sys/dst/bias", 60));
-	dst.start_mon(p.getInt("/sys/dst/start_mon", 1));	
-	dst.start_week(p.getInt("/sys/dst/start_week", 1));	
-	dst.start_date(p.getInt("/sys/dst/start_date", 0));	//从星期天开始算，星期天表示0.星期一表示1
-	dst.start_time(p.getInt("/sys/dst/start_time", 2));
-	dst.end_mon(p.getInt("/sys/dst/end_mon", 1));	
-	dst.end_week(p.getInt("/sys/dst/end_week", 1));	
-	dst.end_date(p.getInt("/sys/dst/end_date", 0));	
-	dst.end_time(p.getInt("/sys/dst/end_time", 2));
+	dst.start_dst(p.getText("/sys/dst/start", "1.1.0/01"));
+	dst.end_dst(p.getText("/sys/dst/end", "1.1.1/02"));
 
+	tcpdump.enable(p.setInt("/sys/tcpdump/enable", 0));
+	tcpdump.port(p.setInt("/sys/tcpdump/port", 0));
 
 	admin.passwd(p.getText("/sys/admin/passwd", "123456"));
 
@@ -137,6 +127,7 @@ void __sys::load(void)
 	this->setHttpUser();
 	this->setTZ();
 	this->setTime();
+	// this->setTcpdump();
 	c600.setid();
 
 	if (m_limit == 220) {
@@ -155,26 +146,17 @@ void __sys::save(void)
 	p.setInt("/sys/user/ban", user.ban());
 	p.setInt("/sys/bkg", user.bkg());
 
+	p.setInt("/sys/settime/hour", settime.hour());
 	p.setInt("/sys/settime/date", settime.date());
-	p.setText("/sys/settime/web_time", settime.web_time());
-	p.setText("/sys/settime/time_h", settime.time_h());	//YBH 2020 8/24
-	p.setText("/sys/settime/time_m", settime.time_m());	//YBH 2020 8/24
-	p.setText("/sys/settime/time_s", settime.time_s());	//YBH 2020 8/24
-	p.setText("/sys/settime/date_y", settime.date_y());
-	p.setText("/sys/settime/date_m", settime.date_m());
-	p.setText("/sys/settime/date_d", settime.date_d());
-
+	p.setText("/sys/settime/settime", settime.set_time());
 
 	p.setInt("/sys/dst/enable", dst.enable());
 	p.setInt("/sys/dst/bias", dst.bias());
-	p.setInt("/sys/dst/start_mon", dst.start_mon());
-	p.setInt("/sys/dst/start_week", dst.start_week());
-	p.setInt("/sys/dst/start_date", dst.start_date());
-	p.setInt("/sys/dst/start_time", dst.start_time());
-	p.setInt("/sys/dst/end_mon", dst.end_mon());
-	p.setInt("/sys/dst/end_week", dst.end_week());
-	p.setInt("/sys/dst/end_date", dst.end_date());
-	p.setInt("/sys/dst/end_time", dst.end_time());
+	p.setText("/sys/dst/start", dst.start_dst());
+	p.setText("/sys/dst/end", dst.end_dst());
+
+	p.setInt("/sys/tcpdump/enable", tcpdump.enable());
+	p.setInt("/sys/tcpdump/port", tcpdump.port());
 
 	p.setText("/sys/admin/passwd", admin.passwd());
 
@@ -233,6 +215,7 @@ void __sys::save(void)
 	this->setHttpUser();
 	this->setTZ();
 	this->setTime();
+	// this->setTcpdump();
 	c600.setid();
 	sound.load();
 
@@ -314,14 +297,14 @@ void __sys::setTZ(void)
 	char s1[3];
 	char s2[3];
 	int h;
-	int m;
+	// int m;
 	int hh;
 	int mm;
 	const char *p = user.tz();
 	memcpy(s1, p+1, 2); s1[2] = 0;
 	memcpy(s2, p+4, 2); s2[2] = 0;
 	h = atoi(s1);
-	m = atoi(s2);
+	// m = atoi(s2);
 
 	mm = sys.dst.bias();
 	printf("dst/bias=%d\n",sys.dst.bias());
@@ -331,17 +314,23 @@ void __sys::setTZ(void)
 		mm -= hh*60;
 	} 
 	
+	int dstStart[4];
+	int dstEnd[4];
+
+	sscanf(sys.dst.start_dst(), "%d.%d.%d/%d", &dstStart[0],  &dstStart[1],  &dstStart[2],  &dstStart[3]);
+	sscanf(sys.dst.end_dst(), "%d.%d.%d/%d", &dstEnd[0],  &dstEnd[1],  &dstEnd[2],  &dstEnd[3]);
+
 	if (sys.dst.m_enable) {
 		if (*p == '-') {
 			h -= hh;	//夏令时提前小时数
 			sprintf(dst, "GMT+%s:00DST+%02d:%02d:00,M%d.%d.%d/%02d:00,M%d.%d.%d/%02d:00", 
-						p+1, h, mm, sys.dst.m_start_mon, sys.dst.m_start_week, sys.dst.m_start_date, sys.dst.start_time(), 
-							sys.dst.m_end_mon, sys.dst.m_end_week, sys.dst.m_end_date, sys.dst.end_time());
+						p+1, h, mm, dstStart[0], dstStart[1], dstStart[2], dstStart[3], 
+							dstEnd[0], dstEnd[1], dstEnd[2], dstEnd[3]);
 		} else {
 			h += hh;
 			sprintf(dst, "GMT-%s:00DST-%02d:%02d:00,M%d.%d.%d/%02d:00,M%d.%d.%d/%02d:00", 
-						p+1, h, mm, sys.dst.m_start_mon, sys.dst.m_start_week, sys.dst.m_start_date, sys.dst.start_time(), 
-							sys.dst.m_end_mon, sys.dst.m_end_week, sys.dst.m_end_date, sys.dst.end_time());
+						p+1, h, mm, dstStart[0], dstStart[1], dstStart[2], dstStart[3], 
+							dstEnd[0], dstEnd[1], dstEnd[2], dstEnd[3]);
 		}
 		setenv("TZ", dst, 1);		
 		printf("sys dst = %s\n",dst);		
@@ -355,17 +344,17 @@ void __sys::setTZ(void)
 	}
 }
 
+
+
+
 void __sys::setTime(void)
-{
+{	
 	int ret = 0;
 	struct tm time_tm;
 	struct timeval time_tv;
 	time_t timep;
-	char p[128];
 
-	sprintf(p, "%s-%s-%s %s:%s:%s", settime.date_y(), settime.date_m(), settime.date_d(), settime.time_h(), settime.time_m(), settime.time_s());
-
-    sscanf(p, "%d-%d-%d %d:%d:%d", &time_tm.tm_year, &time_tm.tm_mon, &time_tm.tm_mday, &time_tm.tm_hour, &time_tm.tm_min, &time_tm.tm_sec);
+    sscanf(settime.set_time(), "%d-%d-%d %d:%d:%d", &time_tm.tm_year, &time_tm.tm_mon, &time_tm.tm_mday, &time_tm.tm_hour, &time_tm.tm_min, &time_tm.tm_sec);
     time_tm.tm_year -= 1900;
     time_tm.tm_mon -= 1;
     time_tm.tm_wday = 0;
@@ -379,7 +368,6 @@ void __sys::setTime(void)
 	if (ret != 0) {
 		fprintf(stderr, "settimeofday failed\n");
 	}
-	printf("settime = %s\n", p);
 }
 
 void __sys::resetMac(void)

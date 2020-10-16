@@ -14,10 +14,15 @@ wTimeSetup::wTimeSetup() : mWindow("ybh_timesetup")
 {
     m_setntp = sys.net.m_ntp_enable;
     m_setdst = sys.dst.m_enable;
+    m_settime = sys.settime.m_hour;
     time_t now = time(NULL);
 	struct tm *tm = localtime(&now);
     char s[128];
+    int startDst[4];
+    int endDst[4];
     int i;
+    sscanf(sys.dst.start_dst(), "%d.%d.%d/%02d", &startDst[0], &startDst[1], &startDst[2], &startDst[3]);
+    sscanf(sys.dst.end_dst(), "%d.%d.%d/%02d", &endDst[0], &endDst[1], &endDst[2], &endDst[3]);
     m_time_set = -1;
     m_ntp_st = -1;
     m_dst_set = -1;
@@ -81,6 +86,7 @@ wTimeSetup::wTimeSetup() : mWindow("ybh_timesetup")
     m_dateformat.load(m_style, "date");  
     m_dateformat.insert(m_style.getText("style/text/date1"));
     m_dateformat.insert(m_style.getText("style/text/date2"));
+    m_dateformat.insert(m_style.getText("style/text/date3"));
     m_dateformat.select(sys.settime.date());
 
     m_date_text.setParent(this);
@@ -135,8 +141,8 @@ wTimeSetup::wTimeSetup() : mWindow("ybh_timesetup")
         m_start_mon.insert(m_style.getText(s));
         m_end_mon.insert(m_style.getText(s));        
     }
-    m_start_mon.select(sys.dst.start_mon()-1);
-    m_end_mon.select(sys.dst.end_mon()-1);
+    m_start_mon.select(startDst[0]-1);
+    m_end_mon.select(endDst[0]-1);
 
     m_start_week.setParent(this);
     m_start_week.load(m_style, "start_week"); 
@@ -157,22 +163,23 @@ wTimeSetup::wTimeSetup() : mWindow("ybh_timesetup")
             m_end_week.insert(m_style.getText(s));
         }
     }
-    m_start_week.select(sys.dst.start_week()-1);
-    m_start_date.select(sys.dst.start_date());
-    m_end_week.select(sys.dst.end_week()-1);
-    m_end_date.select(sys.dst.end_date());
+    printf("endtDst = %d\n",endDst[1]-1);
+    m_start_week.select(startDst[1]-1);
+    m_start_date.select(startDst[2]);
+    m_end_week.select(endDst[1]-1);
+    m_end_date.select(endDst[2]);
 
     m_start_time.setParent(this);
     m_start_time.load(m_style, "start_time");
     m_start_time.setMax(2);
     m_start_time.setMode(mEdit::DSTTIME);
-    m_start_time.setInt(sys.dst.m_start_time);
+    m_start_time.setInt(startDst[3]);
 
     m_end_time.setParent(this);
     m_end_time.load(m_style, "end_time");
     m_end_time.setMax(2);
     m_end_time.setMode(mEdit::DSTTIME);
-    m_end_time.setInt(sys.dst.m_end_time);
+    m_end_time.setInt(endDst[3]);
 
     m_ok.setParent(this);
     m_ok.load(m_style, "ok");
@@ -208,7 +215,6 @@ void wTimeSetup::doEvent(mEvent *e)
 
 void wTimeSetup::enable(void)
 {
-    // printf("okokoko\n");
     if (m_ntp_st != m_setntp) {
         m_ntp_st = m_setntp;
         if (m_ntp_st) {
@@ -220,7 +226,6 @@ void wTimeSetup::enable(void)
 
     if (m_time_set != m_settime) {
         m_time_set = m_settime;
-
         if (m_time_set) {
             m_hour.load(m_style, "hour2");            
         } else {
@@ -248,6 +253,7 @@ void wTimeSetup::doTimer(void)
 void wTimeSetup::save(void)
 {
     int err = 0;
+    char p[128];
 	const char *old_ntp = m_ntp_ip.text();
     const char *old_tz = m_timezone.text();
     const char *old_time_h = m_time_h.text();
@@ -272,17 +278,17 @@ void wTimeSetup::save(void)
     int m = atoi(old_date_m);
     int d = atoi(old_date_d);
     int iDstStartTime = atoi(dst_start_time);
-    int iDstEndtTime = atoi(dst_end_time);
+    int iDstEndTime = atoi(dst_end_time);
 
     /* 年份最大只能设置到2037年 */
     if (atoi(old_time_h) > 23 || atoi(old_time_m) > 59 || atoi(old_time_s) > 59 ||
-            y > 2037 || y ==0  || m > 12 || m == 0 || d == 0 || iDstStartTime > 23 || iDstEndtTime > 23) {
+            y > 2037 || y ==0  || m > 12 || m == 0 || d == 0 || iDstStartTime > 23 || iDstEndTime > 23) {
         err = 1;
     }
 
-    if (old_date_y == "/0" || old_date_m == "/0" || old_date_d == "/0") {
-        err = 1;
-    }
+    // if (old_date_y == "/0" || old_date_m == "/0" || old_date_d == "/0") {
+    //     err = 1;
+    // }
 
     /* 判断是否为闰年 */
     if (m == 4 || m == 6 || m == 9 || m == 11) {
@@ -307,26 +313,39 @@ void wTimeSetup::save(void)
     if (!err) {
         sys.user.tz(old_tz);
         sys.net.ntp(old_ntp);
-        sys.settime.time_h(old_time_h);
-        sys.settime.time_m(old_time_m);
-        sys.settime.time_s(old_time_s);
-        sys.settime.date_y(old_date_y);
-        sys.settime.date_m(old_date_m);
-        sys.settime.date_d(old_date_d);
-        sys.dst.start_time(iDstStartTime);
-        sys.dst.end_time(iDstEndtTime);
-        sys.settime.date(m_dateformat.select());
-        sys.dst.start_mon(m_start_mon.select()+1);
-        sys.dst.start_week(m_start_week.select()+1);
-        sys.dst.start_date(m_start_date.select());
-        sys.dst.end_mon(m_end_mon.select()+1);
-        sys.dst.end_week(m_end_week.select()+1);
-        sys.dst.end_date(m_end_date.select());
+
+        int x[6];
+
+        x[0] = atoi(old_date_y);
+        x[1] = atoi(old_date_m);
+        x[2] = atoi(old_date_d);
+        x[3] = atoi(old_time_h);
+        x[4] = atoi(old_time_m);
+        x[5] = atoi(old_time_s);
+
+        sprintf(sys.settime.m_settime, "%04d-%02d-%02d %02d:%02d:%02d", x[0], x[1], x[2], x[3], x[4], x[5]);
+        // sys.settime.time_h(old_time_h);
+        // sys.settime.time_m(old_time_m);
+        // sys.settime.time_s(old_time_s);
+        // sys.settime.date_y(old_date_y);
+        // sys.settime.date_m(old_date_m);
+        // sys.settime.date_d(old_date_d);
+        sprintf(sys.dst.m_start_dst, "%d.%d.%d/%02d", m_start_mon.select()+1, m_start_week.select()+1, m_start_date.select(), iDstStartTime);
+        sprintf(sys.dst.m_end_dst, "%d.%d.%d/%02d", m_end_mon.select()+1, m_end_week.select()+1, m_end_date.select(), iDstEndTime);
+        // sys.dst.start_time(iDstStartTime);
+        // sys.dst.end_time(iDstEndtTime);
+        // sys.settime.date(m_dateformat.select());
+        // sys.dst.start_mon(m_start_mon.select()+1);
+        // sys.dst.start_week(m_start_week.select()+1);
+        // sys.dst.start_date(m_start_date.select());
+        // sys.dst.end_mon(m_end_mon.select()+1);
+        // sys.dst.end_week(m_end_week.select()+1);
+        // sys.dst.end_date(m_end_date.select());
 
         sys.net.ntp_enable(m_setntp);
+        sys.settime.hour(m_settime);
         sys.dst.enable(m_setdst);
         sys.save();
-        printf("%d\n", sys.settime.date());
         // sys.load();
         sound.setup_ok();
     } else {

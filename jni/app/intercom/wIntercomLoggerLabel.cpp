@@ -209,7 +209,6 @@ void wIntercomLoggerLabel::doEvent(mEvent *e)
 			}
 		} else if (e->wParam == m_exit.id()) {
 			sCaller.stop();
-
 			wIntercom *w = new wIntercom();
 			w->show();
 		}
@@ -237,7 +236,6 @@ void wIntercomLoggerLabel::doTimer(void)
 			}
 		}
 	}
-
 	if (m_ts && labs(time(NULL)-m_ts) > 1) {
 		m_ts = 0;
 		m_start = 0;
