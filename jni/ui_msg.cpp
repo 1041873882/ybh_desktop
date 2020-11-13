@@ -47,6 +47,7 @@ static void ui_talk_start(const char *body)
 		}
 	}
 	if (ok) {
+		printf("ui_talk_start\n");
 		sCaller.ringing(host);
 	} else {
 		dmsg req;
@@ -444,13 +445,20 @@ static void ui_web_time_read(const char *body)
 {
 	dxml p;
 	
+	char s[128];
+	time_t now = time(NULL);
+	struct tm *tm = localtime(&now);
+	sprintf(s, "%04d-%02d-%02d %02d:%02d:%02d", tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+	printf("web time == %s\n", s);
+	printf("sys.net.ntp_enable() = %d\n", sys.net.ntp_enable());
+
 	p.setInt("/params/ntp/enable", sys.net.ntp_enable());
 	p.setText("/params/ntp/server", sys.net.ntp());
 	p.setText("/params/settime/tz", sys.user.tz());
 
 	p.setInt("/params/settime/hour_24", sys.settime.hour());
 	p.setInt("/params/settime/date", sys.settime.date());
-	p.setText("/params/settime/settime", sys.settime.set_time());
+	p.setText("/params/settime/settime", s);
 
 	p.setInt("/params/dst/enable", sys.dst.enable());
 	p.setInt("/params/dst/bias", sys.dst.bias());	
@@ -517,19 +525,43 @@ static void ui_web_tcpdump_write(const char *body)
 	}
 }
 
-static void ui_web_calllogs_read(const char *body)
+static void ui_web_calllog_read(const char *body)
 {
 	dxml p;
+	char s[128];
+	const char * FILE_NAME = "/dnake/data/logger/talk.xml";
 
+	int err = 0;
+	FILE *fp = fopen(FILE_NAME, "rb");
+	if (fp == NULL) {
+		perror("errno");
+		err = 1;
+	} 
+
+	p.setInt("/params/calllog/enable", err);
+	// sLogger.talk.date();
+	sLogger.talk.load();
+	sLogger.talk.date();
+	
 	dmsg_ack(200, p.data());
 }
 
-static void ui_web_calllogs_write(const char *body)
+static void ui_web_calllog_write(const char *body)
 {
 	dmsg_ack(200, NULL);
 	dxml p(body);
 
-	sys.save();
+	int num;
+	char action[512];
+
+	num = p.getInt("/params/calllog/num", 0);
+	if (action != NULL) {
+		strcpy(action, p.getText("/params/calllog/action", "-1"));
+	}
+
+	if (num) {
+		sLogger.talk.web_remove(num,action);
+	}
 }
 
 
@@ -597,6 +629,8 @@ int ui_msg_init(void)
 	dmsg_setup("/ui/web/time/read", ui_web_time_read);	
 	dmsg_setup("/ui/web/time/write", ui_web_time_write);
 
+	dmsg_setup("/ui/web/calllog/read", ui_web_calllog_read);
+	dmsg_setup("/ui/web/calllog/write", ui_web_calllog_write);
 
 	return 0;
 }

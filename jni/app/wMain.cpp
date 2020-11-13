@@ -24,6 +24,7 @@
 #include "wTimeSetup.h"
 #include "wTimeSetup.h"
 
+
 //mWindow *SysMain = NULL;
 
 int sys_ipwd_err = 0;
@@ -144,7 +145,8 @@ void wMain::doEvent(mEvent *e)
 			ybh_wSetup *w = new ybh_wSetup();
 			w->show();
 		} else if (e->wParam == m_records.id()) {
-			ybh_wRecords *w = new ybh_wRecords();
+			// ybh_wRecords *w = new ybh_wRecords();
+			wIntercom *w = new wIntercom();
 			w->show();
 		} else if (e->wParam == m_cameras.id()) {
 			ybh_wCameras *w = new ybh_wCameras();

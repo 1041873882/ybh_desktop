@@ -97,6 +97,8 @@ void SysCaller::ringing(const char *id)
 		strcpy(m_id, id);
 		m_h2id_mark = 1;
 	}
+	printf("ringring start\n");
+	printf("ringring m_id == %s\n", m_id);
 	m_window = 1;
 }
 
@@ -142,7 +144,6 @@ void SysCaller::stop(void)
 			m_h2id[i] = NULL;
 		}
 	}
-
 	m_window = 2;
 }
 

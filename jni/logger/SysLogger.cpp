@@ -15,14 +15,21 @@ void TalkLogger::load(void)
 
 	char s[128];
 	sprintf(s, "%s/talk.xml", sLogger.dir());
+	// strcpy(s, "/dnake/httpd/cgi-bin/talklogs.xml");
 	p.loadFile(s);
 
 	m_sz = p.getInt("/logger/max", 0);
+	printf("p.getInt(, 0) %d\n", m_sz);
+	
 	if (m_sz > MAX_LOGGER_SZ || m_sz < 0)
 		m_sz = 0;
 	for(int i=0; i<m_sz; i++) {
 		sprintf(s, "/logger/d%d/id", i);
 		data[i].id = p.getText(s, "err");
+
+		sprintf(s, "/logger/d%d/date", i);		//YBH 2020/11/3
+		data[i].date = p.getText(s, "err");
+		
 		sprintf(s, "/logger/d%d/type", i);
 		data[i].type = p.getInt(s, 0);
 		sprintf(s, "/logger/d%d/done", i);
@@ -45,7 +52,11 @@ void TalkLogger::save(void)
 	for(int i=0; i<m_sz; i++) {
 		sprintf(s, "/logger/d%d/id", i);
 		p.setText(s, data[i].id.c_str());
-		sprintf(s, "/logger/d%d/sip_url", i);
+
+		sprintf(s, "/logger/d%d/date", i);		//YBH 2020/11/3
+		p.setText(s, data[i].date.c_str());
+
+		sprintf(s, "/logger/d%d/type", i);
 		p.setInt(s, data[i].type);
 		sprintf(s, "/logger/d%d/done", i);
 		p.setInt(s, data[i].done);
@@ -56,9 +67,12 @@ void TalkLogger::save(void)
 		sprintf(s, "/logger/d%d/ts", i);
 		p.setInt(s, data[i].ts);
 	}
+	printf("save start\n");
 	sprintf(s, "%s/talk.xml", sLogger.dir());
+	// strcpy(s, "/dnake/httpd/cgi-bin/talklogs.xml");
 	p.saveFile(s);
 	system("sync");
+	printf("save end\n");
 }
 
 void TalkLogger::insert(int type)
@@ -76,6 +90,8 @@ void TalkLogger::insert(int type)
 	data[0].format = (sCaller.host2id(sCaller.m_id) != NULL) ? 1 : 0;
 	data[0].timeout = (type != NA) ? sCaller.ts() : 0;
 	data[0].ts = sCaller.m_ts;
+
+	
 	if (data[0].timeout > 12*60*60) //时间错乱
 		data[0].timeout = 0;
 	m_sz++;
@@ -93,13 +109,62 @@ void TalkLogger::insert(int type)
 
 void TalkLogger::remove(int n)
 {
+	printf("remove start!\n");
 	if (n < m_sz) {
 		int m = m_sz-n-1;
 		for(int i=0; i<m; i++) {
-			data[n+i] = data[n+i+1];
+			data[n+i] = data[n+i+1]; 
 		}
 		if (m_sz > 0)
-			m_sz--;
+			m_sz--;   
+		this->save();
+	}
+}
+
+void TalkLogger::date(void)
+{
+	printf("TalkLogger::date start\n");
+	char s[64];
+	for (int i = 0; i < m_sz; i++) {
+		time_t ts = data[i].ts;
+		struct tm *tm = localtime(&ts);
+		sprintf(s, "%d-%02d-%02d | %02d:%02d:%02d", tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+		data[i].date = s;
+	}
+	this->save();
+}
+
+
+void TalkLogger::web_remove(int n, char *action) 
+{
+	char s[512];
+	int err = 0;
+	int num = n;
+	int d = 0;
+	strcpy(s, action);
+	const char *p[n];
+
+	p[0] = strtok(s, ".");
+	for (int i = 1; i < n; i++) {
+		p[i] = strtok(NULL, ".");
+	}
+
+	for (int i = 0; i < n; i++) {
+		if (p[i] == NULL) {
+			err = 1;
+			break;
+		}		
+		d = atoi(p[i]);
+		if (d < m_sz) {
+			int m = m_sz-d-1;
+			for(int z=0; z<m; z++) {
+				data[d+z] = data[d+z+1]; 
+			}
+			if (m_sz > 0)
+				m_sz--;   		
+		}
+	}
+	if (!err) {
 		this->save();
 	}
 }

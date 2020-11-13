@@ -14,6 +14,8 @@ public:
 	void save(void);
 	void insert(int type);
 	void remove(int n);
+	void web_remove(int n, char *action);
+	void date(void);
 
 	enum {
 		IN = 1, //呼入
@@ -23,6 +25,7 @@ public:
 
 	struct {
 		std::string id;
+		std::string date;
 		int type; // 1:呼入 2:呼出 3:未接
 		int done; // 0:未读 1:已读
 		int format; //DNAKE格式
@@ -41,7 +44,7 @@ public:
 
 	void load(void);
 	void save(void);
-	void insert(time_t ts, const char *url);
+	void insert(time_t ts,const char *url);
 	void remove(time_t ts);
 	const char *url(time_t ts);
 

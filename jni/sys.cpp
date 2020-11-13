@@ -296,51 +296,45 @@ void __sys::setTZ(void)
 	char dst[128];
 	char s1[3];
 	char s2[3];
+	int dstStart[4];
+	int dstEnd[4];
+	int dstHour;
+	int dstBias;
 	int h;
-	// int m;
-	int hh;
-	int mm;
 	const char *p = user.tz();
 	memcpy(s1, p+1, 2); s1[2] = 0;
 	memcpy(s2, p+4, 2); s2[2] = 0;
-	h = atoi(s1);
-	// m = atoi(s2);
+	dstHour = atoi(s1);
 
-	mm = sys.dst.bias();
-	printf("dst/bias=%d\n",sys.dst.bias());
+	dstBias = sys.dst.bias();
 	
-	hh = mm/60;
-	if (mm >= 60) {
-		mm -= hh*60;
+	h = dstBias/60;
+	if (dstBias >= 60) {
+		dstBias -= h*60;
 	} 
-	
-	int dstStart[4];
-	int dstEnd[4];
 
 	sscanf(sys.dst.start_dst(), "%d.%d.%d/%d", &dstStart[0],  &dstStart[1],  &dstStart[2],  &dstStart[3]);
 	sscanf(sys.dst.end_dst(), "%d.%d.%d/%d", &dstEnd[0],  &dstEnd[1],  &dstEnd[2],  &dstEnd[3]);
 
 	if (sys.dst.m_enable) {
 		if (*p == '-') {
-			h -= hh;	//夏令时提前小时数
+			dstHour -= h;	//夏令时提前小时数
 			sprintf(dst, "GMT+%s:00DST+%02d:%02d:00,M%d.%d.%d/%02d:00,M%d.%d.%d/%02d:00", 
-						p+1, h, mm, dstStart[0], dstStart[1], dstStart[2], dstStart[3], 
+						p+1, dstHour, dstBias, dstStart[0], dstStart[1], dstStart[2], dstStart[3], 
 							dstEnd[0], dstEnd[1], dstEnd[2], dstEnd[3]);
 		} else {
-			h += hh;
+			dstHour += h;
 			sprintf(dst, "GMT-%s:00DST-%02d:%02d:00,M%d.%d.%d/%02d:00,M%d.%d.%d/%02d:00", 
-						p+1, h, mm, dstStart[0], dstStart[1], dstStart[2], dstStart[3], 
+						p+1, dstHour, dstBias, dstStart[0], dstStart[1], dstStart[2], dstStart[3], 
 							dstEnd[0], dstEnd[1], dstEnd[2], dstEnd[3]);
 		}
-		setenv("TZ", dst, 1);		
-		printf("sys dst = %s\n",dst);		
+		setenv("TZ", dst, 1);			
 	} else {
 		if (*p == '-')
 			sprintf(tz, "GMT+%s", p+1);
 		else
 			sprintf(tz, "GMT-%s", p+1);	
 		setenv("TZ", tz, 1);		
-		printf("sys tz = %s\n",tz);
 	}
 }
 
@@ -354,7 +348,7 @@ void __sys::setTime(void)
 	struct timeval time_tv;
 	time_t timep;
 
-    sscanf(settime.set_time(), "%d-%d-%d %d:%d:%d", &time_tm.tm_year, &time_tm.tm_mon, &time_tm.tm_mday, &time_tm.tm_hour, &time_tm.tm_min, &time_tm.tm_sec);
+    sscanf(settime.set_time(), "%04d-%02d-%02d %02d:%02d:%02d", &time_tm.tm_year, &time_tm.tm_mon, &time_tm.tm_mday, &time_tm.tm_hour, &time_tm.tm_min, &time_tm.tm_sec);
     time_tm.tm_year -= 1900;
     time_tm.tm_mon -= 1;
     time_tm.tm_wday = 0;
